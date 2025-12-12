@@ -1,0 +1,18 @@
+{
+    "shortDescription": "Zero-config runtime page translation using Google Translate API",
+    "keywords": "cfwheels,wheels,plugin",
+    "private": false,
+    "version": "1.0.0",
+    "directory": "/plugins/",
+    "slug": "wheels-googleTranslator",
+    "name": "Wheels Google Translator",
+    "type": "cfwheels-plugins",
+    "author": "wheels-dev",
+    "packageDirectory": "googleTranslator",
+    "homepage": "https://github.com/wheels-dev/wheels-googleTranslator",
+    "Bugs" : "https://github.com/wheels-dev/wheels-googleTranslator/issues",
+    "Repository" : { 
+        "type" : "git", 
+        "URL" : "https://github.com/wheels-dev/wheels-googleTranslator"
+    }
+}
