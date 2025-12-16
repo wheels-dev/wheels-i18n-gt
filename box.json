@@ -9,10 +9,10 @@
     "type": "cfwheels-plugins",
     "author": "wheels-dev",
     "packageDirectory": "googleTranslator",
-    "homepage": "https://github.com/wheels-dev/wheels-googleTranslator",
-    "Bugs" : "https://github.com/wheels-dev/wheels-googleTranslator/issues",
+    "homepage": "https://github.com/wheels-dev/wheels-i18n-gt",
+    "Bugs" : "https://github.com/wheels-dev/wheels-i18n-gt/issues",
     "Repository" : { 
         "type" : "git", 
-        "URL" : "https://github.com/wheels-dev/wheels-googleTranslator"
+        "URL" : "https://github.com/wheels-dev/wheels-i18n-gt"
     }
 }

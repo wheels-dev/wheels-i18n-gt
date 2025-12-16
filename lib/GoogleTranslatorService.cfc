@@ -1,7 +1,7 @@
 component output="false" {
 
     variables.config = {};
-    variables.cache  = {};
+    variables.cache  = {};   // simple in-memory cache (html+lang hash → translated)
 
     public any function init(
         required string defaultLanguage,
@@ -17,16 +17,30 @@ component output="false" {
     /**
      * Public translate method – called from the plugin's gt() function
      */
-    public string function $translate(required string text, required string target) {
-        local.cacheKey = hash(arguments.text & "|" & arguments.target);
+    public string function $translate(
+        required any text, 
+        required string target, 
+        string format = "text"
+    ) {
+        local.cacheKey = hash(arguments.text & "|" & arguments.target & "|" & arguments.format);
 
         // Return cached result when enabled
         if (variables.config.cacheEnabled && structKeyExists(variables.cache, local.cacheKey)) {
             return variables.cache[local.cacheKey];
         }
 
-        local.result = $translateViaGoogle(arguments.text, arguments.target);
-        
+        local.result = $translateViaGoogle(arguments.text, arguments.target, arguments.format);
+        // Choose provider
+        // switch(variables.config.provider) {
+        //     case "google":
+        //         local.result = $translateViaGoogle(arguments.text, arguments.target);
+        //         break;
+        //     case "mymemory":
+        //     default:
+        //         local.result = $translateViaMyMemory(arguments.text, arguments.target);
+        //         break;
+        // }
+
         // Cache when enabled
         if (variables.config.cacheEnabled) {
             variables.cache[local.cacheKey] = local.result;
@@ -35,7 +49,11 @@ component output="false" {
         return local.result;
     }
 
-    private string function $translateViaGoogle(required string text, required string target) {
+    private string function $translateViaGoogle(
+        required any text, 
+        required string target, 
+        required string format
+    ) {
         if (!len(variables.config.apiKey)) {
             return arguments.text;
         }
@@ -51,7 +69,7 @@ component output="false" {
         ) {
             cfhttpparam(type="formfield", name="q",      value=arguments.text);
             cfhttpparam(type="formfield", name="target", value=arguments.target);
-            cfhttpparam(type="formfield", name="format", value="html");
+            cfhttpparam(type="formfield", name="format", value=arguments.format);
             cfhttpparam(type="formfield", name="key",    value=variables.config.apiKey);
         }
 
