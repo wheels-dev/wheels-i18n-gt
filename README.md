@@ -38,6 +38,10 @@ set(gt_apiKey="YOUR_GOOGLE_API_KEY");
 set(gt_cacheEnabled=false); // set true in production
 ```
 
+To obtain a Google Cloud Translation API key, follow the official setup guide: https://cloud.google.com/translate/docs/setup
+
+___Note:___  __You will need a Google Cloud project with billing enabled. New users get free credits to start.__
+
 ### Configuration Options
 
 | Setting | Default | Description |
@@ -131,7 +135,7 @@ languages = availableLanguages();       // ["en", "es", "fr"]
 
 ## License
 
-[MIT](https://github.com/wheels-dev/wheels-i18n/blob/main/LICENSE)
+[MIT](https://github.com/wheels-dev/wheels-i18n-gt/blob/main/LICENSE)
 
 ## Author
 

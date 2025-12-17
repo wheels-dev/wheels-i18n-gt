@@ -51,7 +51,13 @@ set(gt_apiKey="YOUR_GOOGLE_API_KEY");
 set(gt_cacheEnabled=false);
 </pre>
 
-<p>Below is a description of all available i18n configuration settings and their default values:</p>
+<p>To obtain a Google Cloud Translation API key, follow the official setup guide: <a href="https://cloud.google.com/translate/docs/setup" target="_blank">https://cloud.google.com/translate/docs/setup</a></p>
+
+<div class="note">
+<strong>Note:</strong> You will need a Google Cloud project with billing enabled. New users get free credits to start.
+</div>
+
+<p>Below is a description of all available configuration settings and their default values:</p>
 
 <table>
     <thead>
