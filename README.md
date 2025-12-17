@@ -1,4 +1,4 @@
-# wheels-googleTranslator
+# wheels Internationalization via Google Translator
 
 **Runtime HTML & text translation plugin for Wheels 3.x using Google Translate API**
 
