@@ -1,6 +1,6 @@
 {
-    "shortDescription": "Zero-config runtime page translation using Google Translate API",
-    "keywords": "cfwheels,wheels,plugin",
+    "shortDescription": "Internationalization (i18n) plugin for Wheels with runtime translation support using Google Translate",
+    "keywords": "cfwheels,wheels,plugin,i18n,internationalization,localization,translation,google-translate,multilingual",
     "private": false,
     "version": "1.0.0",
     "directory": "/plugins/",
