@@ -14,9 +14,9 @@ component output="false" {
     }
     
     /**
-     * Public translate method – called from the plugin's gt() function
+     * Public translate method – called from the plugin's whlsGt() function
      */
-    public string function $translate(
+    public string function $whlsTranslate(
         required any text, 
         required string target, 
         string format = "text"
@@ -28,7 +28,7 @@ component output="false" {
             return variables.cache[local.cacheKey];
         }
 
-        local.result = $translateViaGoogle(arguments.text, arguments.target, arguments.format);
+        local.result = $whlsTranslateViaGoogle(arguments.text, arguments.target, arguments.format);
 
         // Cache when enabled
         if (variables.config.cacheEnabled) {
@@ -47,7 +47,7 @@ component output="false" {
      * - Safely parses JSON response
      * - Falls back to original text on any error or invalid response
      */
-    private string function $translateViaGoogle(
+    private string function $whlsTranslateViaGoogle(
         required any text, 
         required string target, 
         required string format
@@ -92,7 +92,7 @@ component output="false" {
      * - template: HTML string containing {{t_n}} placeholders
      * - translatables: ordered array of text segments to translate
      */
-    public struct function $tokenizeHtml(required string html) {
+    public struct function $whlsTokenizeHtml(required string html) {
         local.tokens = reMatchNoCase("(<[^>]+>|[^<]+)", arguments.html);
 
         local.template      = [];
@@ -138,7 +138,7 @@ component output="false" {
      *
      * This structure allows reliable parsing after translation.
      */
-    public string function $buildTranslationPayload(required array translatables) {
+    public string function $whlsBuildTranslationPayload(required array translatables) {
         local.parts = [];
 
         for (local.item in arguments.translatables) {
@@ -157,7 +157,7 @@ component output="false" {
      * Into:
      *   { t_1 = "Hola", t_2 = "Mundo" }
      */
-    public struct function $parseTranslatedPayload(required string str) {
+    public struct function $whlsParseTranslatedPayload(required string str) {
         local.clean = trim(arguments.str);
 
         // Strip outer { }
@@ -183,7 +183,7 @@ component output="false" {
      * Replaces {{t_n}} placeholders in the HTML template
      * with translated values from the map.
      */
-    public string function $applyTranslations(
+    public string function $whlsApplyTranslations(
         required string html,
         required struct map
     ) {

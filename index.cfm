@@ -99,29 +99,29 @@ set(gt_cacheEnabled=false);
 
 <h2>Plugin Functions</h2>
 <ul>
-    <li><code>#gt("text", "language", "format")#</code> → Translate Single Text</li>
-    <li><code>#gtTranslate("text", "language")#</code> → Translate Full Page</li>
-    <li><code>#changeLanguage("es")#</code> → Switch language</li>
-    <li><code>#currentLanguage()#</code> → Get current language</li>
-    <li><code>#availableLanguages()#</code> → Array of supported languages</li>
+    <li><code>#whlsGt("text", "language", "format")#</code> → Translate Single Text</li>
+    <li><code>#whlsGtTranslate("text", "language")#</code> → Translate Full Page</li>
+    <li><code>#whlsChangeLanguage("es")#</code> → Switch language</li>
+    <li><code>#whlsCurrentLanguage()#</code> → Get current language</li>
+    <li><code>#whlsAvailableLanguages()#</code> → Array of supported languages</li>
 </ul>
 
 <hr>
 
 <h3>Usage: Key Functions</h3>
 
-<h4>Translate Single Text - <code>gt()</code></h4>
+<h4>Translate Single Text - <code>whlsGt()</code></h4>
 <p>The core function to translate a single text to the destination language, with parameter interpolation and fallback logic.</p>
 
 <pre>
 // Basic Usage
-#gt("Welcome to the application", "es", "text")#      // (Output: Bienvenido a la aplicación)
+#whlsGt("Welcome to the application", "es", "text")#      // (Output: Bienvenido a la aplicación)
 
 // With parameter interpolation
-#gt("Hello, Mr John Doe!", "fr", "text")#   // (Output: "Bonjour, Monsieur John Doe!")
+#whlsGt("Hello, Mr John Doe!", "fr", "text")#   // (Output: "Bonjour, Monsieur John Doe!")
 </pre>
 
-<h4>Translate Full HTML Content – <code>gtTranslate()</code></h4> 
+<h4>Translate Full HTML Content – <code>whlsGtTranslate()</code></h4> 
 <p>
     Translates a full HTML block or page while <strong>preserving the original markup</strong>.
     Only readable text nodes are sent to the translation provider, ensuring that
@@ -134,42 +134,42 @@ set(gt_cacheEnabled=false);
 
 <pre>
 // Translate full HTML content
-#gtTranslate(includeContent(), "es")#
+#whlsGtTranslate(includeContent(), "es")#
 
 // Translate a raw HTML string
-#gtTranslate(
+#whlsGtTranslate(
     text   = "&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;Welcome to our site&lt;/p&gt;",
     target = "fr"
 )#
 </pre>
 
 <div class="highlight">
-<strong>Tip:</strong> Wrap your full page output with <code>gtTranslate()</code> to translate everything at once.
+<strong>Tip:</strong> Wrap your full page output with <code>whlsGtTranslate()</code> to translate everything at once.
 </div>
 
-<h4>Current Language - <code>currentLanguage()</code></h4>
+<h4>Current Language - <code>whlsCurrentLanguage()</code></h4>
 <p>Gets the current application language from the Session, or the default language if not set.</p>
 
 <pre>
-language = currentLanguage(); // "en"
+language = whlsCurrentLanguage(); // "en"
 </pre>
 
-<h4>Change Language - <code>changeLanguage()</code></h4>
+<h4>Change Language - <code>whlsChangeLanguage()</code></h4>
 <p>Sets the application language in Session and returns a boolean based on success.</p>
 
 <pre>
 // Change to Spanish
-changeLanguage("es");
+whlsChangeLanguage("es");
 
 // Unsupported language
-changeLanguage("jp"); // false
+whlsChangeLanguage("jp"); // false
 </pre>
 
-<h4>Available Languages - <code>availableLanguages()</code></h4>
+<h4>Available Languages - <code>whlsAvailableLanguages()</code></h4>
 <p>Returns an array of all configured available languages.</p>
 
 <pre>
-languages = availableLanguages(); // ["en", "es", "fr"]
+languages = whlsAvailableLanguages(); // ["en", "es", "fr"]
 </pre>
 
 <hr>

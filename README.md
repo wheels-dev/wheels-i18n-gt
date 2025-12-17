@@ -55,25 +55,25 @@ ___Note:___  __You will need a Google Cloud project with billing enabled. New us
 
 ## Plugin Functions
 
-- `#gt("text", "language", "format")#` → Translate Single Text
-- `#gtTranslate("text", "language")#` → Translate Full Page
-- `#currentLanguage()#` → Get current language
-- `#changeLanguage("es")#` → Switch language
-- `#availableLanguages()#` → Array of supported languages
+- `#whlsGt("text", "language", "format")#` → Translate Single Text
+- `#whlsGtTranslate("text", "language")#` → Translate Full Page
+- `#whlsCurrentLanguage()#` → Get current language
+- `#whlsChangeLanguage("es")#` → Switch language
+- `#whlsAvailableLanguages()#` → Array of supported languages
 
 ---
 ## Usage: Key Functions
 
-### Translate Single Text - `gt()`
+### Translate Single Text - `whlsGt()`
 
 The core function to translate a single text to the destination language, with parameter interpolation and fallback logic.
 
 ```cfml
 // Basic Usage
-#gt("Welcome to the application", "es", "text")#      // (Output: Bienvenido a la aplicación)
+#whlsGt("Welcome to the application", "es", "text")#      // (Output: Bienvenido a la aplicación)
 
 // With parameter interpolation
-#gt("Hello, Mr John Doe!", "fr", "text")#   // (Output: "Bonjour, Monsieur John Doe!")
+#whlsGt("Hello, Mr John Doe!", "fr", "text")#   // (Output: "Bonjour, Monsieur John Doe!")
 ```
 
 ### Translate Full HTML (Recommended)
@@ -84,50 +84,50 @@ This function is ideal for translating:
 
 ```cfml
 // Translate full HTML content
-#gtTranslate(includeContent(), "es")#
+#whlsGtTranslate(includeContent(), "es")#
 
 // Translate a raw HTML string
-#gtTranslate(
+#whlsGtTranslate(
     text   = "<h1>Hello World</h1><p>Welcome to our site</p>",
     target = "fr"
 )#
 ```
 
-___Tip:___ __Wrap your full page output with gtTranslate() to translate everything at once.__
+___Tip:___ __Wrap your full page output with whlsGtTranslate() to translate everything at once.__
 
-### Get Current Language - `currentLanguage()`
+### Get Current Language - `whlsCurrentLanguage()`
 
 Gets the current application language from the Session, or the default language if not set.
 
 ```cfml
-language = currentLanguage();       // "en"
+language = whlsCurrentLanguage();       // "en"
 ```
 
-### Change Language - `changeLanguage()`
+### Change Language - `whlsChangeLanguage()`
 
 Sets the application language in Session and returns a boolean based on success.
 
 ```cfml
 // Change to Spanish
-changeLanguage("es");
+whlsChangeLanguage("es");
 
 // Unsupported language
-changeLanguage("jp");       // false
+whlsChangeLanguage("jp");       // false
 ```
 
-### Get All Available Languages - `availableLanguages()`
+### Get All Available Languages - `whlsAvailableLanguages()`
 
 Returns an array of all configured available languages.
 
 ```cfml
-languages = availableLanguages();       // ["en", "es", "fr"]
+languages = whlsAvailableLanguages();       // ["en", "es", "fr"]
 ```
 ---
 
 ## Best Practices
 
 - Translate **once per page**, not per component
-- Always use `gtTranslate()` for full-page output
+- Always use `whlsGtTranslate()` for full-page output
 - Enable caching in production to reduce API usage
 - Avoid translating dynamic fragments repeatedly
 

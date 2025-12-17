@@ -64,14 +64,14 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
      * Supports variable interpolation via argumentCollection.
      *
      * Examples:
-     *   gt("Hello world", "es", "text");
+     *   whlsGt("Hello world", "es", "text");
      */
-    public string function gt(required string text, required string target, required string format) {
+    public string function whlsGt(required string text, required string target, required string format) {
         local.appKey      = application.wo.$appKey();
         local.service     = application[local.appKey].googleTranslator;
 
         // Pass through all arguments so interpolation works inside the service if needed
-        local.translation = local.service.$translate(
+        local.translation = local.service.$whlsTranslate(
             text   = arguments.text,
             target = arguments.target,
             format = arguments.format,
@@ -90,7 +90,7 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
      *
      * Intended for full-page or large HTML blocks.
      */
-    public string function gtTranslate(
+    public string function whlsGtTranslate(
         required string text,
         required string target
     ) {
@@ -98,17 +98,17 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
         local.service = application[local.appKey].googleTranslator;
 
         // 1. Split HTML into translatable tokens
-        local.tokensData = local.service.$tokenizeHtml(arguments.text);
+        local.tokensData = local.service.$whlsTokenizeHtml(arguments.text);
 
         if (!arrayLen(tokensData.translatables)) {
             return arguments.text;
         }
 
         // 2. Build payload for translator
-        local.payload = local.service.$buildTranslationPayload(tokensData.translatables);
+        local.payload = local.service.$whlsBuildTranslationPayload(tokensData.translatables);
 
         // 3. Translate
-        local.translation = local.service.$translate(
+        local.translation = local.service.$whlsTranslate(
             text   = payload,
             target = arguments.target,
             format = "text",
@@ -116,15 +116,15 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
         );
 
         // 4. Parse + rebuild final HTML
-        local.map = local.service.$parseTranslatedPayload(local.translation);
-        return local.service.$applyTranslations(tokensData.template, local.map);
+        local.map = local.service.$whlsParseTranslatedPayload(local.translation);
+        return local.service.$whlsApplyTranslations(tokensData.template, local.map);
     }
 
     /**
      * Get current application language from Session,
      * or return the default language if not set.
      */
-    public string function currentLanguage() {
+    public string function whlsCurrentLanguage() {
         if (structKeyExists(session, "lang") && len(session.lang)) {
             return session.lang;
         }
@@ -138,7 +138,7 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
      * - true  → language was valid and updated
      * - false → language not supported
      */
-    public boolean function changeLanguage(required string language) {
+    public boolean function whlsChangeLanguage(required string language) {
         if (listFindNoCase(get("gt_availableLanguages"), arguments.language)) {
             session.lang = arguments.language;
             return true;
@@ -149,7 +149,7 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
     /**
      * Returns all configured available languages as an array.
      */
-    public array function availableLanguages() {
+    public array function whlsAvailableLanguages() {
         return listToArray(get("gt_availableLanguages"));
     }
 
