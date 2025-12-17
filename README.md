@@ -11,10 +11,11 @@ Translate entire pages on-the-fly without JSON files or database tables.
 - Full page HTML translation (markup-safe)
 - Plain text translation
 - Session-based language switching
-- Google Translate API support
 - Optional in-memory caching
 - Zero schema / zero migration
 - Works with Wheels + BoxLang
+
+___Use case:___ __Perfect when you need instant multilingual pages without managing translation files.__
 
 ---
 
@@ -33,7 +34,6 @@ Add the following settings to `config/settings.cfm`:
 ```cfml
 set(gt_defaultLanguage="en");
 set(gt_availableLanguages="en,es,fr");
-set(gt_provider="google");
 set(gt_apiKey="YOUR_GOOGLE_API_KEY");
 set(gt_cacheEnabled=false); // set true in production
 ```
@@ -44,38 +44,80 @@ set(gt_cacheEnabled=false); // set true in production
 |-------|---------|-------------|
 | gt_defaultLanguage | en | Default / fallback language |
 | gt_availableLanguages | en | Comma-separated allowed languages |
-| gt_provider | google | Translation provider |
 | gt_apiKey | empty | Google Translate API key |
 | gt_cacheEnabled | false | Cache translated output in memory |
 
 ---
 
-## Usage
+## Plugin Functions
 
-### Translate Plain Text
+- `#gt("text", "language", "format")#` → Translate Single Text
+- `#gtTranslate("text", "language")#` → Translate Full Page
+- `#currentLanguage()#` → Get current language
+- `#changeLanguage("es")#` → Switch language
+- `#availableLanguages()#` → Array of supported languages
+
+---
+## Usage: Key Functions
+
+### Translate Single Text - `gt()`
+
+The core function to translate a single text to the destination language, with parameter interpolation and fallback logic.
 
 ```cfml
-#gt("Hello World", "es", "text")#
+// Basic Usage
+#gt("Welcome to the application", "es", "text")#      // (Output: Bienvenido a la aplicación)
+
+// With parameter interpolation
+#gt("Hello, Mr John Doe!", "fr", "text")#   // (Output: "Bonjour, Monsieur John Doe!")
 ```
 
 ### Translate Full HTML (Recommended)
 
-```cfml
-#gtTranslate(renderView(), "fr")#
-```
+Translates a full HTML block or page while `preserving the original markup`. Only readable text nodes are sent to the translation provider, ensuring that HTML tags, attributes, and structure remain untouched.
 
-This safely translates only readable text and preserves all HTML markup.
-
----
-
-## Language Helpers
+This function is ideal for translating:
 
 ```cfml
-changeLanguage("es");      // switch session language
-currentLanguage();         // get current language
-availableLanguages();      // array of supported languages
+// Translate full HTML content
+#gtTranslate(includeContent(), "es")#
+
+// Translate a raw HTML string
+#gtTranslate(
+    text   = "<h1>Hello World</h1><p>Welcome to our site</p>",
+    target = "fr"
+)#
 ```
 
+___Tip:___ __Wrap your full page output with gtTranslate() to translate everything at once.__
+
+### Get Current Language - `currentLanguage()`
+
+Gets the current application language from the Session, or the default language if not set.
+
+```cfml
+language = currentLanguage();       // "en"
+```
+
+### Change Language - `changeLanguage()`
+
+Sets the application language in Session and returns a boolean based on success.
+
+```cfml
+// Change to Spanish
+changeLanguage("es");
+
+// Unsupported language
+changeLanguage("jp");       // false
+```
+
+### Get All Available Languages - `availableLanguages()`
+
+Returns an array of all configured available languages.
+
+```cfml
+languages = availableLanguages();       // ["en", "es", "fr"]
+```
 ---
 
 ## Best Practices
@@ -89,11 +131,8 @@ availableLanguages();      // array of supported languages
 
 ## License
 
-MIT License
-
----
+[MIT](https://github.com/wheels-dev/wheels-i18n/blob/main/LICENSE)
 
 ## Author
 
-**wheels-dev**  
-https://github.com/wheels-dev
+[Wheels-dev](https://forgebox.io/@wheels%2Ddev)

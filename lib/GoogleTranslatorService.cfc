@@ -6,7 +6,6 @@ component output="false" {
     public any function init(
         required string defaultLanguage,
         required string availableLanguages,
-        required string provider,
         required string apiKey,
         required boolean cacheEnabled
     ) {
@@ -30,16 +29,6 @@ component output="false" {
         }
 
         local.result = $translateViaGoogle(arguments.text, arguments.target, arguments.format);
-        // Choose provider
-        // switch(variables.config.provider) {
-        //     case "google":
-        //         local.result = $translateViaGoogle(arguments.text, arguments.target);
-        //         break;
-        //     case "mymemory":
-        //     default:
-        //         local.result = $translateViaMyMemory(arguments.text, arguments.target);
-        //         break;
-        // }
 
         // Cache when enabled
         if (variables.config.cacheEnabled) {
@@ -49,6 +38,15 @@ component output="false" {
         return local.result;
     }
 
+    /**
+     * Sends text to Google Translate API and returns translated output.
+     *
+     * Responsibilities:
+     * - Makes a POST request to Google Translate v2 API
+     * - Supports plain text or HTML translation via `format`
+     * - Safely parses JSON response
+     * - Falls back to original text on any error or invalid response
+     */
     private string function $translateViaGoogle(
         required any text, 
         required string target, 
@@ -87,28 +85,120 @@ component output="false" {
         return arguments.text; // fallback
     }
 
-    private string function $translateViaMyMemory(required string text, required string target) {
-        local.source   = variables.config.defaultLanguage;
-        local.endpoint = "https://api.mymemory.translated.net/get";
+    /**
+     * Splits HTML into tokens and extracts translatable text segments.
+     *
+     * Returns:
+     * - template: HTML string containing {{t_n}} placeholders
+     * - translatables: ordered array of text segments to translate
+     */
+    public struct function $tokenizeHtml(required string html) {
+        local.tokens = reMatchNoCase("(<[^>]+>|[^<]+)", arguments.html);
 
-        cfhttp(
-            method = "get",
-            url    = local.endpoint,
-            charset= "utf-8",
-            result = "local.httpResp"
-        ) {
-            cfhttpparam(type="url", name="q",       value=urlEncodedFormat(arguments.text));
-            cfhttpparam(type="url", name="langpair", value=local.source & "|" & arguments.target);
-        }
+        local.template      = [];
+        local.translatables = [];
+        local.counter       = 0;
 
-        if (isJSON(local.httpResp.filecontent)) {
-            local.json = deserializeJSON(local.httpResp.filecontent);
-            if (structKeyExists(local.json, "responseData") && structKeyExists(local.json.responseData, "translatedText")) {
-                return local.json.responseData.translatedText;
+        for (local.token in tokens) {
+
+            // Keep HTML tags intact
+            if (left(token, 1) == "<") {
+                template.append(token);
+                continue;
             }
+
+            local.txt = trim(token);
+
+            // Skip empty / numeric / symbols-only text
+            if (!len(txt) || reFind("^[\d\s\W]+$", txt)) {
+                template.append(token);
+                continue;
+            }
+
+            counter++;
+            local.key = "t_" & counter;
+
+            translatables.append({
+                key   = key,
+                value = txt
+            });
+
+            template.append("{{" & key & "}}");
         }
 
-        return arguments.text; // fallback
+        return {
+            template      = arrayToList(template, ""),
+            translatables = translatables
+        };
+    }
+
+    /**
+     * Builds a structured translation payload string in the format:
+     * { key | {value} | key | {value} }
+     *
+     * This structure allows reliable parsing after translation.
+     */
+    public string function $buildTranslationPayload(required array translatables) {
+        local.parts = [];
+
+        for (local.item in arguments.translatables) {
+            parts.append(item.key);
+            parts.append("{" & item.value & "}");
+        }
+
+        return "{" & arrayToList(parts, " | ") & "}";
+    }
+
+    /**
+     * Parses a translated payload back into a key/value map.
+     *
+     * Converts:
+     *   { t_1 | {Hola} | t_2 | {Mundo} }
+     * Into:
+     *   { t_1 = "Hola", t_2 = "Mundo" }
+     */
+    public struct function $parseTranslatedPayload(required string str) {
+        local.clean = trim(arguments.str);
+
+        // Strip outer { }
+        clean = reReplace(clean, "^\{|\}$", "", "all");
+
+        local.parts = listToArray(clean, "|");
+        local.map   = {};
+
+        for (local.i = 1; i <= arrayLen(parts); i += 2) {
+            local.key   = trim(parts[i]);
+            local.value = trim(parts[i + 1]);
+
+            // Remove inner wrapping { }
+            value = reReplace(value, "^\{(.*)\}$", "\1", "one");
+
+            map[key] = value;
+        }
+
+        return map;
+    }
+
+    /**
+     * Replaces {{t_n}} placeholders in the HTML template
+     * with translated values from the map.
+     */
+    public string function $applyTranslations(
+        required string html,
+        required struct map
+    ) {
+        local.result = arguments.html;
+
+        for (local.key in arguments.map) {
+            result = replace(
+                result,
+                "{{" & key & "}}",
+                map[key],
+                "all"
+            );
+        }
+
+        return result;
     }
 
 }

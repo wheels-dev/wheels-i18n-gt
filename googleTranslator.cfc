@@ -32,9 +32,6 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
         if (!structKeyExists(application[local.appKey], "gt_availableLanguages")) {
             application.wo.set(gt_availableLanguages="en");
         }
-        if (!structKeyExists(application[local.appKey], "gt_provider")) {
-            application.wo.set(gt_provider="google");           // configuration for future APIs 
-        }
         if (!structKeyExists(application[local.appKey], "gt_apiKey")) {
             application.wo.set(gt_apiKey="");
         }
@@ -56,7 +53,6 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
         ).init(
             defaultLanguage      = application.wo.get("gt_defaultLanguage"),
             availableLanguages   = application.wo.get("gt_availableLanguages"),
-            provider             = application.wo.get("gt_provider"),
             apiKey               = application.wo.get("gt_apiKey"),
             cacheEnabled         = application.wo.get("gt_cacheEnabled")
         );
@@ -102,14 +98,14 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
         local.service = application[local.appKey].googleTranslator;
 
         // 1. Split HTML into translatable tokens
-        local.tokensData = tokenizeHtml(arguments.text);
+        local.tokensData = local.service.$tokenizeHtml(arguments.text);
 
         if (!arrayLen(tokensData.translatables)) {
             return arguments.text;
         }
 
         // 2. Build payload for translator
-        local.payload = buildTranslationPayload(tokensData.translatables);
+        local.payload = local.service.$buildTranslationPayload(tokensData.translatables);
 
         // 3. Translate
         local.translation = local.service.$translate(
@@ -120,124 +116,8 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
         );
 
         // 4. Parse + rebuild final HTML
-        local.map = parseTranslatedPayload(local.translation);
-        return applyTranslations(tokensData.template, local.map);
-    }
-
-    /**
-     * Splits HTML into tokens and extracts translatable text segments.
-     *
-     * Returns:
-     * - template: HTML string containing {{t_n}} placeholders
-     * - translatables: ordered array of text segments to translate
-     */
-    public struct function tokenizeHtml(required string html) {
-        local.tokens = reMatchNoCase("(<[^>]+>|[^<]+)", arguments.html);
-
-        local.template      = [];
-        local.translatables = [];
-        local.counter       = 0;
-
-        for (local.token in tokens) {
-
-            // Keep HTML tags intact
-            if (left(token, 1) == "<") {
-                template.append(token);
-                continue;
-            }
-
-            local.txt = trim(token);
-
-            // Skip empty / numeric / symbols-only text
-            if (!len(txt) || reFind("^[\d\s\W]+$", txt)) {
-                template.append(token);
-                continue;
-            }
-
-            counter++;
-            local.key = "t_" & counter;
-
-            translatables.append({
-                key   = key,
-                value = txt
-            });
-
-            template.append("{{" & key & "}}");
-        }
-
-        return {
-            template      = arrayToList(template, ""),
-            translatables = translatables
-        };
-    }
-
-    /**
-     * Builds a structured translation payload string in the format:
-     * { key | {value} | key | {value} }
-     *
-     * This structure allows reliable parsing after translation.
-     */
-    public string function buildTranslationPayload(required array translatables) {
-        local.parts = [];
-
-        for (local.item in arguments.translatables) {
-            parts.append(item.key);
-            parts.append("{" & item.value & "}");
-        }
-
-        return "{" & arrayToList(parts, " | ") & "}";
-    }
-
-    /**
-     * Parses a translated payload back into a key/value map.
-     *
-     * Converts:
-     *   { t_1 | {Hola} | t_2 | {Mundo} }
-     * Into:
-     *   { t_1 = "Hola", t_2 = "Mundo" }
-     */
-    public struct function parseTranslatedPayload(required string str) {
-        local.clean = trim(arguments.str);
-
-        // Strip outer { }
-        clean = reReplace(clean, "^\{|\}$", "", "all");
-
-        local.parts = listToArray(clean, "|");
-        local.map   = {};
-
-        for (local.i = 1; i <= arrayLen(parts); i += 2) {
-            local.key   = trim(parts[i]);
-            local.value = trim(parts[i + 1]);
-
-            // Remove inner wrapping { }
-            value = reReplace(value, "^\{(.*)\}$", "\1", "one");
-
-            map[key] = value;
-        }
-
-        return map;
-    }
-
-    /**
-     * Replaces {{t_n}} placeholders in the HTML template
-     * with translated values from the map.
-     */
-    public string function applyTranslations(
-        required string html,
-        required struct map
-    ) {
-        local.result = arguments.html;
-
-        for (local.key in arguments.map) {
-            result = replace(
-                result,
-                "{{" & key & "}}",
-                map[key],
-                "all"
-            );
-        }
-
-        return result;
+        local.map = local.service.$parseTranslatedPayload(local.translation);
+        return local.service.$applyTranslations(tokensData.template, local.map);
     }
 
     /**

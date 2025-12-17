@@ -47,10 +47,47 @@
 <pre>
 set(gt_defaultLanguage="en");
 set(gt_availableLanguages="en,es,fr");
-set(gt_provider="google");
 set(gt_apiKey="YOUR_GOOGLE_API_KEY");
 set(gt_cacheEnabled=false);
 </pre>
+
+<p>Below is a description of all available i18n configuration settings and their default values:</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Setting Name</th>
+            <th>Default Value</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>gt_defaultLanguage</strong></td>
+            <td><code>"en"</code></td>
+            <td>The default language (language code) to use if no session language is set.</td>
+        </tr>
+        <tr>
+            <td><strong>gt_availableLanguages</strong></td>
+            <td><code>"en"</code></td>
+            <td>A comma-separated list of all supported languages (e.g., <code>"en,es,fr"</code>).</td>
+        </tr>
+        <tr>
+            <td><strong>gt_apiKey</strong></td>
+            <td><code>empty</code></td>
+            <td>Google Translation API Key for your application translations.</td>
+        </tr>
+        <tr>
+            <td><strong>gt_cacheEnabled</strong></td>
+            <td><code>false</code></td>
+            <td>Set true to cache translations in memory (recommended for production).</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="note">
+    <strong>Pro Tip:</strong> Set <code>gt_cacheEnabled=true</code> in production for fast performance.
+</div>
 
 <hr>
 
@@ -92,9 +129,7 @@ set(gt_cacheEnabled=false);
 <pre>
 // Translate full HTML content
 #gtTranslate(includeContent(), "es")#
-</pre>
 
-<pre>
 // Translate a raw HTML string
 #gtTranslate(
     text   = "&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;Welcome to our site&lt;/p&gt;",
