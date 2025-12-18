@@ -17,7 +17,7 @@
     a:hover {text-decoration: underline;}
 </style>
 
-<h1>wheels-googleTranslator v1.0.0</h1>
+<h1>Wheels Google Translator</h1>
 <p><strong>Runtime page & HTML translation plugin for Wheels using Google Translate API.</strong></p>
 
 <hr>
