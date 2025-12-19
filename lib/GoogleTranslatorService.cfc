@@ -71,7 +71,11 @@ component output="false" {
             cfhttpparam(type="formfield", name="key",    value=variables.config.apiKey);
         }
 
-        if (isJSON(local.httpResp.filecontent)) {
+        if (
+            structKeyExists(local.httpResp, "statusCode") &&
+            local.httpResp.statusCode == "200" &&
+            isJSON(local.httpResp.filecontent)
+        ) {
             local.json = deserializeJSON(local.httpResp.filecontent);
             if (
                 structKeyExists(local.json, "data") &&
