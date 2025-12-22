@@ -49,7 +49,7 @@ component hint="wheels-googleTranslator" output="false" mixin="global" {
 
         application[local.appKey].googleTranslator = createObject(
             "component",
-            "plugins.googleTranslator.lib.GoogleTranslatorService"
+            "plugins.i18nGt.lib.GoogleTranslatorService"
         ).init(
             defaultLanguage      = application.wo.get("gt_defaultLanguage"),
             availableLanguages   = application.wo.get("gt_availableLanguages"),

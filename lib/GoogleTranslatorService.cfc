@@ -72,8 +72,8 @@ component output="false" {
         }
 
         if (
-            structKeyExists(local.httpResp, "statusCode") &&
-            local.httpResp.statusCode == "200" &&
+            structKeyExists(local.httpResp, "status_code") &&
+            local.httpResp.status_code == "200" &&
             isJSON(local.httpResp.filecontent)
         ) {
             local.json = deserializeJSON(local.httpResp.filecontent);
