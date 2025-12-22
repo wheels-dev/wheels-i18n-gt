@@ -127,10 +127,10 @@ jobs:
           echo "All packages validated successfully!"
           echo "=========================================="
 
-      # - name: Publish All Packages to ForgeBox
-      #   run: |
-      #     # Publish stable release and mark as current/stable version
-      #     ./scripts/publish-to-forgebox.sh "wheels-dev" "${{ secrets.FORGEBOX_PASS }}" "true" "true"
+      - name: Publish All Packages to ForgeBox
+        run: |
+          # Publish stable release and mark as current/stable version
+          ./scripts/publish-to-forgebox.sh "wheels-dev" "${{ secrets.FORGEBOX_PASS }}" "true" "true"
 
       #############################################
       # Build Artifacts for GitHub
