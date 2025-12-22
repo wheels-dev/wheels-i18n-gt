@@ -1,4 +1,4 @@
-# Wheels Internationalization(i18n) Google Translation
+# Wheels Internationalization(i18n) Google Translator
 
 **Runtime HTML & text translation plugin for Wheels 3.x using Google Translate API**
 
