@@ -1,0 +1,169 @@
+# This workflow is used to release master releases and also by the snapshot workflow
+# to release snapshots.
+name: Wheels Release
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  WHEELS_PRERELEASE: false
+
+jobs:
+  #############################################
+  # Build Snapshot or Final Release
+  #############################################
+  build:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        id: Checkout-Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Environment Variables For Build Process
+        id: Calculate-Version-And-Branch
+        run: |
+          pwd
+          cat box.json
+          echo "WHEELS_VERSION=`cat box.json | jq '.version' -r`+${{ github.run_number }}" >> $GITHUB_ENV
+          # main or snapshot
+          echo "BRANCH=main" >> $GITHUB_ENV
+          if [ $GITHUB_REF == 'refs/heads/develop' ]
+          then
+            echo "BRANCH=develop" >> $GITHUB_ENV
+          fi
+
+      - name: Make build scripts executable
+        run: |
+          sudo apt-get update && sudo apt-get install -y dos2unix
+          dos2unix scripts/*.sh
+          chmod +x scripts/*.sh
+          # List scripts for verification
+          ls -la scripts/
+
+
+      #############################################
+      # Prepare and Publish to ForgeBox
+      #############################################
+
+
+      - name: Prepare Wheels I18N-GT for ForgeBox
+        run: |
+         ./scripts/prepare-i18n-gt.sh "${{ env.WHEELS_VERSION }}" "${{ env.BRANCH }}" "${{ github.run_number }}" "${{ env.WHEELS_PRERELEASE }}"
+
+
+      - name: Install CommandBox
+        run: |
+          curl -fsSl https://downloads.ortussolutions.com/debs/gpg | sudo gpg --dearmor -o /usr/share/keyrings/ortussolutions.gpg
+          echo "deb [signed-by=/usr/share/keyrings/ortussolutions.gpg] https://downloads.ortussolutions.com/debs/noarch /" | sudo tee /etc/apt/sources.list.d/ortussolutions.list
+          sudo apt-get update && sudo apt-get install -y commandbox
+
+      #############################################
+      # Validate Packages Before Publishing
+      #############################################
+
+      - name: Validate Package Structure and Versions
+        run: |
+          echo "=========================================="
+          echo "Validating Packages Before ForgeBox Publish"
+          echo "=========================================="
+
+          # Function to validate a package
+          validate_package() {
+            local PACKAGE_DIR=$1
+            local PACKAGE_NAME=$2
+
+            echo ""
+            echo "Validating $PACKAGE_NAME..."
+
+            # Check if directory exists
+            if [ ! -d "$PACKAGE_DIR" ]; then
+              echo "ERROR: Directory $PACKAGE_DIR does not exist!"
+              exit 1
+            fi
+
+            # Check if box.json exists
+            if [ ! -f "$PACKAGE_DIR/box.json" ]; then
+              echo "ERROR: box.json not found in $PACKAGE_DIR!"
+              exit 1
+            fi
+
+            # Validate box.json syntax
+            if ! jq empty "$PACKAGE_DIR/box.json" 2>/dev/null; then
+              echo "ERROR: Invalid JSON in $PACKAGE_DIR/box.json"
+              exit 1
+            fi
+
+            # Extract and display version
+            local VERSION=$(jq -r '.version' "$PACKAGE_DIR/box.json")
+            echo "  Version: $VERSION"
+
+            # Check that version matches expected version
+            if [[ "$VERSION" != "${{ env.WHEELS_VERSION }}" ]]; then
+              echo "  WARNING: Version mismatch! Expected ${{ env.WHEELS_VERSION }}, got $VERSION"
+            fi
+
+            # Count files
+            local FILE_COUNT=$(find "$PACKAGE_DIR" -type f | wc -l)
+            echo "  Files: $FILE_COUNT"
+
+            if [ "$FILE_COUNT" -eq 0 ]; then
+              echo "ERROR: No files found in package directory!"
+              exit 1
+            fi
+
+            echo "  ✓ Package validated successfully"
+          }
+
+          # Validate package
+          validate_package "build-wheels-i18n-gt/wheels-i18n-gt" "Wheels I18N-GT"
+
+          echo ""
+          echo "=========================================="
+          echo "All packages validated successfully!"
+          echo "=========================================="
+
+      # - name: Publish All Packages to ForgeBox
+      #   run: |
+      #     # Publish stable release and mark as current/stable version
+      #     ./scripts/publish-to-forgebox.sh "wheels-dev" "${{ secrets.FORGEBOX_PASS }}" "true" "true"
+
+      #############################################
+      # Build Artifacts for GitHub
+      #############################################
+
+      - name: Build All Wheels Artifacts
+        run: |
+          ./scripts/build-i18n-gt.sh "${{ env.WHEELS_VERSION }}" "${{ env.BRANCH }}" "${{ github.run_number }}" "${{ env.WHEELS_PRERELEASE }}"
+
+
+      - name: Upload Wheels I18N-GT Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-i18n-gt
+          path: |
+            artifacts/wheels/${{ env.WHEELS_VERSION }}/wheels-i18n-gt-*.zip
+            artifacts/wheels/${{ env.WHEELS_VERSION }}/wheels-i18n-gt-*.md5
+            artifacts/wheels/${{ env.WHEELS_VERSION }}/wheels-i18n-gt-*.sha512
+            artifacts/wheels/wheels-i18n-gt-be.zip
+      
+      
+      - name: Upload All Wheels Artifacts (Combined)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-all
+          path: |
+            artifacts/**/*
+
+      - name: Upload Workflow Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-release
+          path: |
+            ${{ runner.temp }}/_runner_diag/
+            ${{ runner.temp }}/_github_workflow/
